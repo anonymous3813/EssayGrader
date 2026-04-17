@@ -1,10 +1,18 @@
-<script>
+<script lang="ts">
+    import type { TemplateOption } from '$lib/types';
+	import { onMount } from 'svelte';
     
-	let { options = [], value = $bindable(''), onSelect = () => {} } = $props();
+	let { options = [], value = $bindable(''), onSelect = () => {} }: { options: TemplateOption[], value: string, onSelect: (id: string) => void } = $props();
 
 	let open = $state(false);
-
-	function selectOption(opt) {
+	$effect(() => {
+        console.log('options changed:', options);
+    });
+	onMount(() => {
+		console.log(options);
+	});
+	
+	function selectOption(opt: TemplateOption) {
 		value = opt.id;
 		onSelect(opt.id);
 		open = false;
@@ -39,12 +47,11 @@
 					class="item"
 					type="button"
 					onclick={() => {
-						toggle();
 						selectOption(opt);
 					}}
 				>
 					<div class="label">{opt.label}</div>
-					<div class="sub">{opt.criteria.length} criteria</div>
+					<div class="sub">{opt.criteria_list.length} criteria</div>
 				</button>
 			{/each}
 		</div>

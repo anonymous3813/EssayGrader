@@ -36,9 +36,10 @@
 	});
 
 	let totalPoints = $derived(
-		rubric
-			? rubric.criteria.reduce((sum, c) => sum + (c.possible_points || 0) * (c.weight || 1), 0)
-			: 0
+		rubric?.criteria_list?.reduce(
+			(sum, c) => sum + (c.possible_points || 0) * (c.weight || 1),
+			0
+		) ?? 0
 	);
 </script>
 
@@ -75,7 +76,7 @@
 			</div>
 
 			<section class="criteria-list">
-				{#each rubric.criteria as crit, i}
+				{#each rubric.criteria_list as crit, i (rubric.id + i)}
 					<div class="crit-card" style="--i:{i}">
 						<div class="crit-header">
 							<div class="crit-number">{(i + 1).toString().padStart(2, '0')}</div>

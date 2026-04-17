@@ -34,7 +34,7 @@
 			label: rubricName.trim(),
 			desc: criteriaList.length + ' criteria defined.',
 			tags: ['Custom'],
-			criteria: criteriaList.map(c => ({...c}))
+			criteria_list: criteriaList.map(c => ({...c}))
 		};
 
 		rubrics.push(newRubric);

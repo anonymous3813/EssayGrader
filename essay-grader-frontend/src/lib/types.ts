@@ -1,11 +1,41 @@
-// place files you want to import through the `$lib` alias in this folder.
-export const templatesOptions = [
+export type ScoringType = 'points' | 'percentage' | string;
+
+export interface RubricCriteria {
+    id?: string;
+    name: string;
+    description: string;
+    weight: number;
+    possible_points: number;
+}
+
+export interface Rubric {
+    rubric_type: string;
+    scoring_type: ScoringType;
+    criteria_list: RubricCriteria[];
+}
+
+export interface Input {
+    question: string;
+    essay: string;
+    rubric: Rubric;
+}
+
+export interface TemplateOption extends Rubric {
+    id: string;
+    label: string;
+    desc?: string;
+    tags?: string[];
+}
+
+export const templatesOptions: TemplateOption[] = [
     {
-        id: 'apush-leq',
+        id: 'APUSH',
         label: 'APUSH LEQ',
         desc: 'Advanced Placement U.S. History Long Essay Question',
         tags: ['APUSH', 'History', 'LEQ'],
-        criteria: [
+        rubric_type: 'APUSH',
+        scoring_type: 'points',
+        criteria_list: [
             {
                 name: 'Thesis / Claim',
                 description: 'Responds to the prompt with a historically defensible thesis or claim that establishes a clear line of reasoning. The thesis must directly answer the prompt and be located in the introduction or conclusion.',
@@ -33,11 +63,13 @@ export const templatesOptions = [
         ]
     },
     {
-        id: 'ielts',
-        label: 'IELTS Writing Task',
+        id: 'IELTS',
+        label: 'IELTS Writing Task 2',
         desc: 'Standardized assessment rubric used for IELTS writing tasks.',
         tags: ['IELTS', 'Standardized'],
-        criteria: [
+        rubric_type: 'IELTS',
+        scoring_type: 'band',
+        criteria_list: [
             {
                 name: 'Task Response',
                 description: 'Addresses all parts of the prompt, presents a clear position, and supports ideas with relevant arguments.',

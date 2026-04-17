@@ -1,16 +1,20 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import TemplateDropdown from './TemplateDropdown.svelte';
 	import { templatesOptions } from '$lib/types';
+	import type { RubricCriteria, TemplateOption } from '$lib/types';
 
-	let { criteriaList = $bindable([]) } = $props();
+	let {
+		criteriaList = $bindable([]),
+		selectedRubric = $bindable(null)
+	}: { criteriaList: RubricCriteria[]; selectedRubric: TemplateOption | null } = $props();
 
 	function generateId() {
 		return Math.random().toString(36).slice(2, 9);
 	}
 
-	let customTemplates = $state([]);
-	let allTemplates = $derived([...templatesOptions, ...customTemplates]);
+	let customTemplates: TemplateOption[] = $state([]);
+	let allTemplates: TemplateOption[] = $derived([...templatesOptions, ...customTemplates]);
 
 	onMount(() => {
 		const stored = localStorage.getItem('saved_rubrics');
@@ -18,20 +22,21 @@
 			try {
 				customTemplates = JSON.parse(stored);
 			} catch (e) {
-                console.error(e);
-            }
+				console.error(e);
+			}
 		}
 	});
 
-	let baseTemplate = $state(null);
+	let baseTemplate: TemplateOption | null = $state(null);
 	let selectedTemplate = $state('');
 
-	function loadTemplate(id) {
+	function loadTemplate(id: string) {
 		const t = allTemplates.find((t) => t.id === id);
 		if (!t) return;
 
 		baseTemplate = t;
-		criteriaList = t.criteria.map((c) => ({
+		selectedRubric = t;
+		criteriaList = t.criteria_list.map((c) => ({
 			...c,
 			id: generateId()
 		}));
@@ -39,10 +44,10 @@
 	let isModified = $derived(() => {
 		if (!baseTemplate) return false;
 
-		if (criteriaList.length !== baseTemplate.criteria.length) return true;
+		if (criteriaList.length !== baseTemplate.criteria_list.length) return true;
 
 		return criteriaList.some((c, i) => {
-			const b = baseTemplate.criteria[i];
+			const b = baseTemplate.criteria_list[i];
 			if (!b) return true;
 
 			return (
@@ -61,10 +66,12 @@
 	function saveCustomTemplate() {
 		if (!newTemplateName.trim()) return;
 
-		const newTemplate = {
+		const newTemplate: TemplateOption = {
 			id: 'custom-' + generateId(),
 			label: newTemplateName.trim(),
-			criteria: criteriaList.map(c => ({...c}))
+			rubric_type: 'custom',
+			scoring_type: 'points',
+			criteria_list: criteriaList.map((c) => ({ ...c }))
 		};
 
 		customTemplates = [...customTemplates, newTemplate];
@@ -89,7 +96,7 @@
 		];
 	}
 
-	function removeCriterion(id) {
+	function removeCriterion(id: string) {
 		criteriaList = criteriaList.filter((c) => c.id !== id);
 	}
 
@@ -111,11 +118,9 @@
 				onSelect={loadTemplate}
 			/>
 		</div>
-		
+
 		{#if canSave}
-			<button class="save-btn" onclick={() => isSaving = !isSaving}>
-				Save As
-			</button>
+			<button class="save-btn" onclick={() => (isSaving = !isSaving)}> Save As </button>
 		{/if}
 	</div>
 
@@ -123,7 +128,7 @@
 		<div class="save-row">
 			<input class="save-input" placeholder="Custom name..." bind:value={newTemplateName} />
 			<button class="confirm-btn" onclick={saveCustomTemplate}>Save</button>
-			<button class="cancel-btn" onclick={() => isSaving = false}>Cancel</button>
+			<button class="cancel-btn" onclick={() => (isSaving = false)}>Cancel</button>
 		</div>
 	{/if}
 
@@ -157,7 +162,8 @@
 						</div>
 					</div>
 
-					<textarea class="desc" rows="1" placeholder="Description..." bind:value={c.description}></textarea>
+					<textarea class="desc" rows="1" placeholder="Description..." bind:value={c.description}
+					></textarea>
 
 					<div class="actions">
 						<button onclick={() => removeCriterion(c.id)}>Remove</button>
@@ -241,7 +247,7 @@
 		font-weight: 600;
 		cursor: pointer;
 	}
-	
+
 	.cancel-btn {
 		background: transparent;
 		color: var(--ink-muted);

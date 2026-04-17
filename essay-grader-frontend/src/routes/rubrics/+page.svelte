@@ -50,20 +50,20 @@
 				<span class="section-num">Templates</span>
 			</h2>
 			<div class="rubric-grid">
-				{#each templates as t, i (t.id)}
+				{#each templates as t, i (t.rubric_type)}
 					<div class="rubric-card" style="--i:{i}">
 						<div class="rubric-card-top">
-							<h3>{t.label}</h3>
+							<h3>{t.rubric_type}</h3>
 							<div class="tag-row">
-								{#each t.tags as tag}
+								{#each t.tags as tag, j (tag)}
 									<span class="tag">{tag}</span>
 								{/each}
 							</div>
 						</div>
 						<p class="rubric-desc">{t.desc}</p>
 						<div class="rubric-card-footer">
-							<a href="/grade?rubric={t.id}" class="use-btn">Use this →</a>
-							<a href="/rubrics/{t.id}" class="preview-link">Preview</a>
+							<a href="/grade?rubric={t.rubric_type}" class="use-btn">Use this →</a>
+							<a href="/rubrics/{t.rubric_type}" class="preview-link">Preview</a>
 						</div>
 					</div>
 				{/each}

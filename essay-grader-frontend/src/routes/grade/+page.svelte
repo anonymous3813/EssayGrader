@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import RubricBuilder from '$lib/components/RubricBuilder.svelte';
 	import { gradingReport } from '$lib/stores.js';
+	import type { RubricCriteria, Input } from '$lib/types';
 
 	let mounted = $state(false);
 	let isGrading = $state(false);
@@ -13,7 +14,7 @@
 	let charCount = $derived(essayText.length);
 
 	// Default criteria to display so it's not empty
-	let criteriaList = $state([
+	let criteriaList: RubricCriteria[] = $state([
 		{
 			id: 'default-1',
 			name: 'Thesis',
@@ -44,6 +45,8 @@
 		}
 	]);
 
+	let selectedRubric = $state(null);
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -60,15 +63,16 @@
 		try {
 			const API_URL = '/api/grade'; 
 
-			const payload = {
+			const payload: Input = {
 				question: promptText,
 				essay: essayText,
 				rubric: {
-					rubric_type: 'custom',
-					scoring_type: 'points',
-					criteria_list: criteriaList
+					rubric_type: selectedRubric?.rubric_type ?? 'custom',
+    				scoring_type: selectedRubric?.scoring_type ?? 'points',
+					criteria_list: $state.snapshot(criteriaList).map(({ id, ...c }) => ({ ...c })) 
 				}
 			};
+			console.log('Submitting payload:', payload);
 
 			const response = await fetch(API_URL, {
 				method: 'POST',
@@ -141,7 +145,7 @@
 						</div>
 					</div>
 
-					<RubricBuilder bind:criteriaList />
+					<RubricBuilder bind:criteriaList bind:selectedRubric/>
 				</section>
 			</section>
 			
